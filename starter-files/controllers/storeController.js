@@ -3,6 +3,10 @@ const Store = mongoose.model('Store');
 
 exports.homePage = (req, res) => {
     console.log(req.name);
+    req.flash('error', 'Something Happened!')
+    req.flash('info', 'Something happened')
+    req.flash('warning', 'Something happened')
+    req.flash('success', 'Something happened')
     res.render('index');
 };
 
@@ -11,8 +15,13 @@ exports.addStore = (req, res) => {
 };
 
 exports.createStore = async (req, res) => {
-    const store = new Store(req.body);
+    const store = await (new Store(req.body)).save();
     await store.save();
-    res.redirect('/')
-    console.log('It worked!');
+    req.flash('success', `Successfully created ${store.name}. Care to leave a review?`)
+    res.redirect(`/store/${store.slug}`)
 }
+
+exports.getStores = async (req, res) => {
+    const stores = await Store.find();
+    res.render('stores', { title: 'Stores', stores });
+};
